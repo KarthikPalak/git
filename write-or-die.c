@@ -22,8 +22,11 @@ void maybe_flush_or_die(FILE *f, const char *desc)
 
 	if (f == stdout) {
 		if (skip_stdout_flush < 0) {
-			skip_stdout_flush = git_env_bool("GIT_FLUSH", -1);
-			if (skip_stdout_flush < 0) {
+			int flush_setting = git_env_bool("GIT_FLUSH", -1);
+
+			if (0 <= flush_setting)
+				skip_stdout_flush = !flush_setting;
+			else {
 				struct stat st;
 				if (fstat(fileno(stdout), &st))
 					skip_stdout_flush = 0;
